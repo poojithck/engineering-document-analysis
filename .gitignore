@@ -1,0 +1,35 @@
+# Output files
+output/
+input/
+# Source PDFs
+FY26 Ericsson BTS Design/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# AWS credentials (never commit these)
+.aws/
