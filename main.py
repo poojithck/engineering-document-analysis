@@ -8,7 +8,9 @@ Stages:
   3. Cost Item Extraction (with truncation-safe continuation)
   4. Claimability Determination (with truncation-safe continuation)
 
-Post-pipeline: generates consolidated steelworks.json at run root.
+Post-pipeline:
+  - Consolidated steelworks.json at run root
+  - Trade-categorised trade_summary.json + trade_summary.md at run root
 """
 import argparse
 import json
@@ -26,6 +28,7 @@ from agents.scope_agent import ScopeAgent
 from config.settings import settings
 from utils.artifact_tracker import ArtifactTracker
 from utils.pdf_processor import PDFProcessor
+from utils.report_generator import build_trade_report
 from utils.text_extractor import TextExtractor
 
 
@@ -242,11 +245,21 @@ def run_pipeline(input_path: str, output_dir: str, stages=None,
             claims_result = claims_agent.run(
                 cost_result, page_index, document_name)
 
+        # ── Post-pipeline reports ───────────────────────────────────
         # Consolidated steelworks report
         logger.info("\n" + "=" * 50)
         logger.info("  Generating steelworks.json")
         logger.info("=" * 50)
         build_steelworks_report(
+            tracker=tracker, document_name=document_name,
+            page_index=page_index, scope_result=scope_result,
+            cost_result=cost_result, claims_result=claims_result)
+
+        # Trade-categorised summary report
+        logger.info("\n" + "=" * 50)
+        logger.info("  Generating trade_summary (by work category)")
+        logger.info("=" * 50)
+        build_trade_report(
             tracker=tracker, document_name=document_name,
             page_index=page_index, scope_result=scope_result,
             cost_result=cost_result, claims_result=claims_result)
@@ -261,6 +274,8 @@ def run_pipeline(input_path: str, output_dir: str, stages=None,
         logger.info(f"  Tokens: {tracker.metadata['total_tokens']:,}")
         logger.info(f"  Errors: {tracker.metadata['errors_count']}")
         logger.info(f"  Steelworks: {tracker.base_dir / 'steelworks.json'}")
+        logger.info(f"  Trade Summary: {tracker.base_dir / 'trade_summary.json'}")
+        logger.info(f"  Trade Report: {tracker.base_dir / 'trade_summary.md'}")
         logger.info("=" * 60)
         return tracker.run_id
 

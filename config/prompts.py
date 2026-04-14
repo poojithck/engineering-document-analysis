@@ -2,6 +2,8 @@
 Centralised prompt templates.
 All stages look for "New", "Proposed", "To be [verb]" + steelworks tables.
 Includes ORIENTATION_CHECK prompts for Claude-based page orientation detection.
+
+UPDATED: Stage 3 cost categories now align with trade-based report sections.
 """
 
 # ─── Orientation Check (Pre-Processing) ────────────────────────────────────
@@ -197,7 +199,20 @@ COST_SYSTEM_PROMPT = """You are a quantity surveyor extracting billable items fr
 
 For each item extract:
 1. **Item Description**: Specific. For steelworks: member type, material, dimensions, finish.
-2. **Category**: Equipment / Cabling / Civil Works / Electrical / Labour Only / Transport / Testing & Commissioning / Structural & Steelworks / Antenna & RF / Other
+2. **Category**: Use these TRADE-BASED categories ONLY:
+   - Antennas (panel antennas, dipoles, antenna mounts, shrouds, radomes, TMAs)
+   - RRUs (remote radio units, baseband units, RRU brackets/mounts)
+   - Cable Trays & Ladders (cable tray, cable ladder, cable support, conduit, trunking, cable containment, cable pits, cable ducts)
+   - Electrical Works (power cables, AC/DC power, circuit breakers, switchboards, batteries, rectifiers, earthing, surge protection, earth bars, lightning protection, metering)
+   - Structural & Steelworks (ALL structural steel: headframes, brackets, RHS/CHS/SHS, platforms, collars, monopole mounts, handrails, base plates, gussets, anchor bolts, fabricated steel items, galvanising)
+   - Footing Works (footings, foundations, concrete, pier, slab, pad footing, excavation, backfill, formwork, reinforcement, grout, screw piles)
+   - Civil Works (trenching, reinstatement, landscaping, fencing, gates, access roads, compounds, hardstands, retaining walls)
+   - Internals (racks, cabinets, shelves, subracks, patch panels, ODF, fibre/optical, splice trays, indoor equipment installation)
+   - RF & Transmission (coaxial cables, feeders, jumpers, RF connectors, combiners, splitters, diplexers, filters, waveguide, RF plumbing)
+   - Signage (RF/EMF signs, hazard signs, warning signs, safety signs, labels)
+   - Testing & Commissioning (PIM tests, VSWR tests, integration, sweep testing, certification, acceptance, inspections)
+   - Transport & Logistics (transport, delivery, freight, crane hire, rigging, mobilisation, site establishment, EWP/EWA, scaffolding, height safety)
+   - Other (anything that does not fit above)
 3. **Quantity** and **Unit** (each/metres/lot/hours/sqm/kg/tonnes)
 4. **Source Pages**
 5. **Procurement vs Labour**: material purchase, pure labour, or both
@@ -210,6 +225,7 @@ STEELWORKS -- DETAILED EXTRACTION:
 - Each steel member from a steelworks table = SEPARATE cost item
 - Include: member description, material spec, dimensions, quantity, unit weight, total weight, finish
 - Flag ALL with is_steelworks_item: true, manufacturer_quote_required: true
+- Category MUST be "Structural & Steelworks"
 - Steelworks needs: fabrication quote + galvanising + transport + crane + height safety
 
 SCOPE RULES:
@@ -226,9 +242,10 @@ Full page index:
 {page_index_json}
 
 Extract all cost items. Special attention to:
-1. Every steelworks item -- individually with full specs
-2. Every "New/Proposed/To be" item
+1. Every steelworks item -- individually with full specs (category: "Structural & Steelworks")
+2. Every "New/Proposed/To be" item -- assign to the correct trade category
 3. Implicit costs (fabrication, galvanising, transport, installation)
+4. Use ONLY the trade-based categories listed in your instructions
 
 Return as JSON with key "cost_items". Do NOT wrap in markdown code fences."""
 
